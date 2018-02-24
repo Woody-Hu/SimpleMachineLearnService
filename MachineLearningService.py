@@ -86,10 +86,6 @@ def forward_caculate(inputShapeDescribe,inputX,inputY):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         
-        print(sess.run(weights[0]))
-        
-        print(sess.run(biases[0]))
-        
         resultValue = sess.run(layer_calculate_result,feed_dict={x:[inputX],y_:[inputY]})
 
 
@@ -97,7 +93,7 @@ def forward_caculate(inputShapeDescribe,inputX,inputY):
 
 
 
-inputDescrib = [ShapeDescribeClass(2),ShapeDescribeClass(1)]
+inputDescrib = [ShapeDescribeClass(2),ShapeDescribeClass(1,2)]
 
 returnValue = forward_caculate(inputDescrib,[1,1],[1])
 
