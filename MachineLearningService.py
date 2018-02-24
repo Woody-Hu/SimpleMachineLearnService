@@ -6,22 +6,35 @@ Created on 2018��2��23��
 '''
 
 import tensorflow as tf
-from _overlapped import NULL
+
 
 # 制作变量
 def MakeVariable(shpae,useName,useStddev = 1):
     return tf.Variable(tf.random_normal(shpae,dtype = tf.float64, stddev = useStddev, name = useName))
 
+# 制作偏移值
 def MakeBiases(shpae,useName):
     return tf.Variable(tf.zeros(shpae, dtype = tf.float64, name = useName))
 
-
+# 根据输入描述制作shape
 def MakeShape(inputShapeDescribe):
-    return NULL
+    returnValue = []
+    lastValue = 0
+    for index, val in enumerate(inputShapeDescribe):
+        if 0 == index:
+            lastValue = val
+            continue
+        tempValue = [lastValue,val]
+        returnValue.append(tempValue)
+        lastValue = val
+        
+    return returnValue
 
+# 层级计算
 def MakeLayerCalculate(inputValue,inputWeight,inputBiases):
     return tf.multiply(inputValue, inputWeight) + inputBiases
 
+# 结果激活
 def MakeLayerActive(inputValue,inputKind):
     if 0 == inputKind:
         return inputValue
@@ -31,7 +44,9 @@ def MakeLayerActive(inputValue,inputKind):
         return tf.nn.tanh(inputValue)
     else:
         return tf.nn.sigmoid(inputValue)
-    
+
+
+
     
     
     
