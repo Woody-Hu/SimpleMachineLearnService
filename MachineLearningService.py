@@ -5,37 +5,37 @@ Created on 2018��2��23��
 @author: Administrator
 '''
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import tensorflow as tf
 
+from ShapeDescribeBean import ShapeDescribeClass
 
-# 制作变量
+
 def make_variable(shpae,useName,useStddev = 1):
     return tf.Variable(tf.random_normal(shpae,dtype = tf.float64, stddev = useStddev, name = useName))
 
-# 制作偏移值
 def make_biases(shpae,useName):
     return tf.Variable(tf.zeros(shpae[1], dtype = tf.float64, name = useName))
 
-# 根据输入描述制作shape
 def make_shape(inputShapeDescribe):
     returnValue = []
     lastValue = 0
     for index, val in enumerate(inputShapeDescribe):
         if 0 == index:
-            lastValue = val
+            lastValue = val.shape
             continue
-        tempValue = [lastValue,val]
+        tempValue = [lastValue,val.shape]
         returnValue.append(tempValue)
-        lastValue = val
+        lastValue = val.shape
         
     return returnValue
 
-# 层级计算
-def makeLayer_calculate(inputValue,inputWeight,inputBiases):
+def make_layer_calculate(inputValue,inputWeight,inputBiases):
     return tf.matmul(inputValue, inputWeight) + inputBiases
 
-# 结果激活
-def make_layeractive(inputValue,inputKind):
+def make_layer_active(inputValue,inputKind):
     if 0 == inputKind:
         return inputValue
     elif 1 == inputKind:
@@ -46,9 +46,9 @@ def make_layeractive(inputValue,inputKind):
         return tf.nn.sigmoid(inputValue)
 
 def prepare_palceholder(inputShapeDescribe):
-    xShape = inputShapeDescribe[0]
+    xShape = inputShapeDescribe[0].shape
     
-    yShape = inputShapeDescribe[-1]
+    yShape = inputShapeDescribe[-1].shape
     
     x = tf.placeholder(tf.float64, [1,xShape])
     
@@ -56,46 +56,52 @@ def prepare_palceholder(inputShapeDescribe):
     
     return x,y_
 
-inputDescrib = [2,3,1]
+def forward_caculate(inputShapeDescribe,inputX,inputY):
+    
+    x,y_ = prepare_palceholder(inputShapeDescribe)
+    
+    useShapes = make_shape(inputShapeDescribe)
+    
+    weights = []
+    biases = []
 
-x,y_ = prepare_palceholder(inputDescrib)
-
-useShapes = make_shape(inputDescrib)
-
-print(useShapes)
-
-weights = []
-
-
-
-biases = []
-
-
-
-for index,val in enumerate(useShapes):
-    weights.append(make_variable(val,useName = 'weight' + str(index)))
-    biases.append(make_biases(val,useName = 'biases' + str(index)))
+    base_weight_str = 'weight'
+    base_biases_str ="biases"
     
 
-firstLayerValue = makeLayer_calculate(x,weights[0],biases[0])
-
-print(firstLayerValue)
-
-y = makeLayer_calculate(firstLayerValue,weights[1],biases[1])
-
-print(y)
-
-with tf.Session() as sess:
-    sess.run(tf.global_variables_initializer())
-    print(sess.run(weights[0]))
-    print(sess.run(weights[1]))
+    for index,val in enumerate(useShapes):
+        weights.append(make_variable(val,useName = base_weight_str + str(index)))
+        biases.append(make_biases(val,useName = base_biases_str + str(index)))
     
-    print(sess.run(biases[0]))
-    print(sess.run(biases[1]))
+    layer_calculate_result = x
     
-    resultValue = sess.run(firstLayerValue,feed_dict={x:[[1,1]],y_:[[1]]})
-    print(resultValue)
-    resultValue
+    for index,oneDes in enumerate(inputShapeDescribe):
+        if 0 == index:
+            continue
+        layer_calculate_result = make_layer_calculate(layer_calculate_result, weights[index - 1], biases[index - 1])
+        layer_calculate_result = make_layer_active(layer_calculate_result,oneDes.active_kind)
+     
+     
+    
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        
+        print(sess.run(weights[0]))
+        
+        print(sess.run(biases[0]))
+        
+        resultValue = sess.run(layer_calculate_result,feed_dict={x:[inputX],y_:[inputY]})
+
+
+    return resultValue
+
+
+
+inputDescrib = [ShapeDescribeClass(2),ShapeDescribeClass(1)]
+
+returnValue = forward_caculate(inputDescrib,[1,1],[1])
+
+print(returnValue)
 
     
 
