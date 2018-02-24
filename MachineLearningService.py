@@ -9,15 +9,15 @@ import tensorflow as tf
 
 
 # 制作变量
-def MakeVariable(shpae,useName,useStddev = 1):
+def make_variable(shpae,useName,useStddev = 1):
     return tf.Variable(tf.random_normal(shpae,dtype = tf.float64, stddev = useStddev, name = useName))
 
 # 制作偏移值
-def MakeBiases(shpae,useName):
+def make_biases(shpae,useName):
     return tf.Variable(tf.zeros(shpae, dtype = tf.float64, name = useName))
 
 # 根据输入描述制作shape
-def MakeShape(inputShapeDescribe):
+def make_shape(inputShapeDescribe):
     returnValue = []
     lastValue = 0
     for index, val in enumerate(inputShapeDescribe):
@@ -31,11 +31,11 @@ def MakeShape(inputShapeDescribe):
     return returnValue
 
 # 层级计算
-def MakeLayerCalculate(inputValue,inputWeight,inputBiases):
+def makeLayer_calculate(inputValue,inputWeight,inputBiases):
     return tf.multiply(inputValue, inputWeight) + inputBiases
 
 # 结果激活
-def MakeLayerActive(inputValue,inputKind):
+def make_layeractive(inputValue,inputKind):
     if 0 == inputKind:
         return inputValue
     elif 1 == inputKind:
@@ -45,6 +45,8 @@ def MakeLayerActive(inputValue,inputKind):
     else:
         return tf.nn.sigmoid(inputValue)
 
+def forward_calculate(inputShapeDescribe,inputXValue):
+    return None
 
 
     
