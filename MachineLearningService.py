@@ -49,9 +49,9 @@ def prepare_palceholder(inputShapeDescribe):
     
     yShape = inputShapeDescribe[-1].shape
     
-    x = tf.placeholder(tf.float64, [1,xShape])
+    x = tf.placeholder(tf.float64, shape = (None,xShape))
     
-    y_ = tf.placeholder(tf.float64,[1,yShape])
+    y_ = tf.placeholder(tf.float64,shape = (None,yShape))
     
     return x,y_
 
@@ -85,13 +85,13 @@ def forward_caculate(inputShapeDescribe,if_get_y_ = False):
     else:
         return layer_calculate_result,x
     
-def backPropagation(inputResult,inputY_):
+def back_propagation(inputResult,inputY_):
     
     cross_entropy = -tf.reduce_mean(inputY_*tf.log(inputResult)) 
     learning_reat = 0.001
     tranin_step = tf.train.AdamOptimizer(learning_reat).minimize(cross_entropy)
     
-    return tranin_step
+    return tranin_step,cross_entropy
 
 def inputCheck(inputShapeDescribe):
     for val in inputShapeDescribe:
@@ -100,7 +100,7 @@ def inputCheck(inputShapeDescribe):
     return True   
 
 
-def Prediction(inputShapeDescribe,inputX):
+def prediction(inputShapeDescribe,inputX):
     if not inputCheck(inputShapeDescribe):
         raise Exception()
     
@@ -108,14 +108,40 @@ def Prediction(inputShapeDescribe,inputX):
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        resultValue = sess.run(result,feed_dict = {x:[inputX]})
+        resultValue = sess.run(result,feed_dict = {x:inputX})
 
     return resultValue
+
+def train(inputShapeDescribe,inputX,inputY_,input_step = 5000,inputBatchSize = 8):
+    if not inputCheck(inputShapeDescribe):
+        raise Exception()
+    
+    (layer_calculate_result,x,y_) = forward_caculate(inputShapeDescribe,True)
+    
+    (tranin_step,cross_entropy) = back_propagation(layer_calculate_result,y_)
+    
+    input_data_size = len(inputY_)
+    
+    returnValue = []
+    
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        for i in range(input_step):
+            start = i*inputBatchSize
+            end = min(start + inputBatchSize, input_data_size)
+            if start > end:
+                start = end
+            sess.run(tranin_step,feed_dict = {x:inputX[start:end],y_:inputY_[start:end]})  
+        
+        if i % 1000 == 0:
+            tempValue = sess.run(cross_entropy,feed_dict = {x:inputX,y_:inputY_})
+            returnValue.append('after %d steps cross_entropy is %g'%(i,tempValue))           
+    return returnValue
 
     
 a = [ShapeDescribeClass(2),ShapeDescribeClass(1)]
 
-b = Prediction(a,[1,1])
+b = prediction(a,[[1,1],[2,2]])
 
 print(b)
     
