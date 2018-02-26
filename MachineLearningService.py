@@ -12,7 +12,6 @@ import tensorflow as tf
 
 from ShapeDescribeBean import ShapeDescribeClass
 
-
 def make_variable(shpae,useName,useStddev = 1):
     return tf.Variable(tf.random_normal(shpae,dtype = tf.float64, stddev = useStddev, name = useName))
 
@@ -56,7 +55,7 @@ def prepare_palceholder(inputShapeDescribe):
     
     return x,y_
 
-def forward_caculate(inputShapeDescribe,inputX,inputY):
+def forward_caculate(inputShapeDescribe,if_get_y_ = False):
     
     x,y_ = prepare_palceholder(inputShapeDescribe)
     
@@ -81,26 +80,44 @@ def forward_caculate(inputShapeDescribe,inputX,inputY):
         layer_calculate_result = make_layer_calculate(layer_calculate_result, weights[index - 1], biases[index - 1])
         layer_calculate_result = make_layer_active(layer_calculate_result,oneDes.active_kind)
      
-     
+    if if_get_y_:
+        return layer_calculate_result,x,y_
+    else:
+        return layer_calculate_result,x
     
+def backPropagation(inputResult,inputY_):
+    
+    cross_entropy = -tf.reduce_mean(inputY_*tf.log(inputResult)) 
+    learning_reat = 0.001
+    tranin_step = tf.train.AdamOptimizer(learning_reat).minimize(cross_entropy)
+    
+    return tranin_step
+
+def inputCheck(inputShapeDescribe):
+    for val in inputShapeDescribe:
+        if not isinstance(val, ShapeDescribeClass):
+            return False
+    return True   
+
+
+def Prediction(inputShapeDescribe,inputX):
+    if not inputCheck(inputShapeDescribe):
+        raise Exception()
+    
+    (result,x) = forward_caculate(inputShapeDescribe)
+
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        
-        resultValue = sess.run(layer_calculate_result,feed_dict={x:[inputX],y_:[inputY]})
-
+        resultValue = sess.run(result,feed_dict = {x:[inputX]})
 
     return resultValue
 
-
-
-inputDescrib = [ShapeDescribeClass(2),ShapeDescribeClass(1,2)]
-
-returnValue = forward_caculate(inputDescrib,[1,1],[1])
-
-print(returnValue)
-
     
+a = [ShapeDescribeClass(2),ShapeDescribeClass(1)]
 
+b = Prediction(a,[1,1])
+
+print(b)
     
     
     
