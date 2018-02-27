@@ -9,14 +9,13 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import tensorflow as tf
-
 from ShapeDescribeBean import ShapeDescribeClass
 
 def make_variable(shpae,useName,useStddev = 1):
     return tf.Variable(tf.random_normal(shpae,dtype = tf.float64, stddev = useStddev, name = useName))
 
 def make_biases(shpae,useName):
-    return tf.Variable(tf.zeros(shpae[1], dtype = tf.float64, name = useName))
+    return tf.Variable(tf.zeros(shpae[1], dtype = tf.float64, name = useName) + 0.1)
 
 def make_shape(inputShapeDescribe):
     returnValue = []
@@ -99,7 +98,6 @@ def inputCheck(inputShapeDescribe):
             return False
     return True   
 
-
 def prediction(inputShapeDescribe,inputX):
     if not inputCheck(inputShapeDescribe):
         raise Exception()
@@ -112,7 +110,7 @@ def prediction(inputShapeDescribe,inputX):
 
     return resultValue
 
-def train(inputShapeDescribe,inputX,inputY_,input_step = 5000,inputBatchSize = 8):
+def train(inputShapeDescribe,inputX,inputY_,input_step = 5000,inputBatchSize = 8, use_save_path = None):
     if not inputCheck(inputShapeDescribe):
         raise Exception()
     
@@ -124,6 +122,9 @@ def train(inputShapeDescribe,inputX,inputY_,input_step = 5000,inputBatchSize = 8
     
     returnValue = []
     
+    if use_save_path != None:
+        saver = tf.train.Saver();
+    
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for i in range(input_step):
@@ -131,11 +132,14 @@ def train(inputShapeDescribe,inputX,inputY_,input_step = 5000,inputBatchSize = 8
             end = min(start + inputBatchSize, input_data_size)
             if start > end:
                 start = end
-            sess.run(tranin_step,feed_dict = {x:inputX[start:end],y_:inputY_[start:end]})  
+            sess.run(tranin_step,feed_dict = {x:inputX[start:end],y_:inputY_[start:end]})
+            if i % 1000 == 0:
+                tempValue = sess.run(cross_entropy,feed_dict = {x:inputX,y_:inputY_})
+                returnValue.append('after %d steps cross_entropy is %g'%(i,tempValue))    
         
-        if i % 1000 == 0:
-            tempValue = sess.run(cross_entropy,feed_dict = {x:inputX,y_:inputY_})
-            returnValue.append('after %d steps cross_entropy is %g'%(i,tempValue))           
+        if use_save_path != None:
+            saver.save(sess, use_save_path)
+                            
     return returnValue
 
     
