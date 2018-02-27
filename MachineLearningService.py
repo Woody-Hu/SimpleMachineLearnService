@@ -142,6 +142,11 @@ def train(inputShapeDescribe,inputX,inputY_,input_step = 5000,inputBatchSize = 8
                             
     return returnValue
 
+def conv_calculate():
+    pass
+
+def pool_calculate():
+    pass
     
 a = [ShapeDescribeClass(2),ShapeDescribeClass(1)]
 
