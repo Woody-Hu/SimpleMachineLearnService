@@ -12,12 +12,21 @@ import tensorflow as tf
 from ShapeDescribeBean import ShapeDescribeClass
 
 def make_variable(shpae,useName,useStddev = 1):
+    '''
+    制作变量
+    '''
     return tf.Variable(tf.random_normal(shpae,dtype = tf.float64, stddev = useStddev, name = useName))
 
 def make_biases(shpae,useName):
+    '''
+    制作偏移量
+    '''
     return tf.Variable(tf.zeros(shpae[1], dtype = tf.float64, name = useName) + 0.1)
 
 def make_shape(inputShapeDescribe):
+    '''
+    根据描述封装制作矩阵
+    '''
     returnValue = []
     lastValue = 0
     for index, val in enumerate(inputShapeDescribe):
@@ -31,9 +40,15 @@ def make_shape(inputShapeDescribe):
     return returnValue
 
 def make_layer_calculate(inputValue,inputWeight,inputBiases):
+    '''
+    进行一层神经网络计算
+    '''
     return tf.matmul(inputValue, inputWeight) + inputBiases
 
 def make_layer_active(inputValue,inputKind):
+    '''
+    层激活函数
+    '''
     if 0 == inputKind:
         return inputValue
     elif 1 == inputKind:
@@ -44,6 +59,9 @@ def make_layer_active(inputValue,inputKind):
         return tf.nn.sigmoid(inputValue)
 
 def prepare_palceholder(inputShapeDescribe):
+    '''
+    根据描述制作输入输出占位
+    '''
     xShape = inputShapeDescribe[0].shape
     
     yShape = inputShapeDescribe[-1].shape
@@ -55,6 +73,9 @@ def prepare_palceholder(inputShapeDescribe):
     return x,y_
 
 def forward_caculate(inputShapeDescribe,if_get_y_ = False):
+    '''
+    全连接神经网络向前计算接口
+    '''
     
     x,y_ = prepare_palceholder(inputShapeDescribe)
     
@@ -86,6 +107,7 @@ def forward_caculate(inputShapeDescribe,if_get_y_ = False):
     
 def back_propagation(inputResult,inputY_):
     
+    
     cross_entropy = -tf.reduce_mean(inputY_*tf.log(inputResult)) 
     learning_reat = 0.001
     tranin_step = tf.train.AdamOptimizer(learning_reat).minimize(cross_entropy)
@@ -93,6 +115,9 @@ def back_propagation(inputResult,inputY_):
     return tranin_step,cross_entropy
 
 def inputCheck(inputShapeDescribe):
+    '''
+    输入检查
+    '''
     for val in inputShapeDescribe:
         if not isinstance(val, ShapeDescribeClass):
             return False
@@ -142,17 +167,13 @@ def train(inputShapeDescribe,inputX,inputY_,input_step = 5000,inputBatchSize = 8
                             
     return returnValue
 
-def conv_calculate():
-    pass
+def get_variable_lastShape(input_variable):
+    '''
+    获得输入变量的最后一阶的形状描述
+    '''
+    return input_variable.get_shape()[-1]
 
-def pool_calculate():
-    pass
-    
-a = [ShapeDescribeClass(2),ShapeDescribeClass(1)]
 
-b = prediction(a,[[1,1],[2,2]])
-
-print(b)
     
     
     
