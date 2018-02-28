@@ -173,7 +173,14 @@ def get_variable_lastShape(input_variable):
     '''
     return input_variable.get_shape()[-1]
 
-
+def cnn_layer_calculate(input_value,input_layer_name):
+    last_deep = get_variable_lastShape(input_value)
+    with tf.variable_scope(input_layer_name):
+        
+        pass
+    
+    
+    pass
     
     
     
