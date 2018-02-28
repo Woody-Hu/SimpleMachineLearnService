@@ -8,8 +8,11 @@ Created on 2018��2��23��
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-import tensorflow as tf
 from ShapeDescribeBean import ShapeDescribeClass
+
+from MatrixDescribeBean import MatrixDescribeClass
+
+import tensorflow as tf
 
 def make_variable(shpae,useName,useStddev = 1):
     '''
@@ -173,14 +176,37 @@ def get_variable_lastShape(input_variable):
     '''
     return input_variable.get_shape()[-1]
 
-def cnn_layer_calculate(input_value,input_layer_name):
+def cnn_layer_calculate(input_value,input_layer_name,input_conv_matrix_bean,
+                        input_pool_matrix_bean,input_active_kind = 1):
+    '''
+    一层卷积+最大池化计算
+    '''
     last_deep = get_variable_lastShape(input_value)
+    #制作卷积层权重形状矩阵
+    use_conv_weight = [input_conv_matrix_bean.get_shape()[0],input_conv_matrix_bean.get_shape()[1]
+                      ,last_deep,input_conv_matrix_bean.get_shape()[2]]
+    #制作卷积层偏移形状矩阵
+    use_conve_biases = [input_conv_matrix_bean.get_shape()[2]]
+    #制作卷积层步长矩阵
+    use_conv_strides = [1,input_conv_matrix_bean.get_strides()[0],input_conv_matrix_bean.get_strides()[1],1]
+    #池化层的形状矩阵
+    use_pool_shape = [1,input_pool_matrix_bean.get_shape()[0],input_pool_matrix_bean.get_shape()[1],1]
+    #池化层的步长矩阵
+    use_pool_strides = [1,input_pool_matrix_bean.get_strides()[0],input_pool_matrix_bean.get_strides()[1],1]
+    
+    
     with tf.variable_scope(input_layer_name):
-        
-        pass
+        weight_variable = make_variable(use_conv_weight,"weight")
+        biases_variable = make_biases(use_conve_biases, "biases")
+        #卷积计算
+        conve_result = tf.nn.conv2d(input_value,weight_variable,strides= use_conv_strides,padding= 'VALID')
+        result = tf.nn.bias_add(conve_result, biases_variable)
+        #激活
+        result = make_layer_active(result, input_active_kind)
+        pool_result = tf.nn.max_pool(result, use_pool_shape, use_pool_strides, 'VALID')
+        return pool_result 
     
-    
-    pass
+    return None
     
     
     

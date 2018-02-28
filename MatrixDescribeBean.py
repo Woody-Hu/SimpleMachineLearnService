@@ -4,7 +4,7 @@ Created on 2018Äê2ÔÂ28ÈÕ
 @author: Administrator
 '''
 
-class MyClass(object):
+class MatrixDescribeClass(object):
     '''
     classdocs
     '''
