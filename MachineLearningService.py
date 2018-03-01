@@ -14,6 +14,8 @@ from MatrixDescribeBean import MatrixDescribeClass
 
 from collections import Iterable
 
+from ModelMakeRequestBean import ModelMakeRequestBean
+
 import tensorflow as tf
 
 def make_variable(shpae,useName,useStddev = 1):
@@ -124,8 +126,6 @@ def nn_forward_caculate(inputShapeDescribe,if_get_y_ = False):
         return layer_calculate_result,x
     
 def back_propagation(inputResult,inputY_):
-    
-    
     cross_entropy = -tf.reduce_mean(inputY_*tf.log(inputResult)) 
     learning_reat = 0.001
     tranin_step = tf.train.AdamOptimizer(learning_reat).minimize(cross_entropy)
@@ -223,35 +223,76 @@ def cnn_layer_calculate(input_value,input_layer_name,input_conv_matrix_bean,
     
     return None
     
-def let_net_5_calculate(input_value_shape,output_value_shape):
-    
-    #声明输入变量
-    x = make_shape(input_value_shape)
-    
+def define_let_net_5_calculate(input_request_bean):
+     
     #声明第一层卷积层形状定义 （5,5,32） 步长 （1,1,1,1）
     conv_matrix_bean_one = MatrixDescribeClass
     (MatrixDescribeClass.get_default_conv_shape(32),MatrixDescribeClass.get_default_strides())
+    
+    pool_matrix_bean = MatrixDescribeClass
+    (MatrixDescribeClass.get_default_pool_shape(),MatrixDescribeClass.get_default_strides())
+    
+    conv_layer_one = CNNPoolLayerDescriBean(conv_matrix_bean_one,pool_matrix_bean)
     
     #声明第三层卷积层形状定义 （5,5,64） 步长 （1,1,1,1）
     conv_matrix_bean_two = MatrixDescribeClass
     (MatrixDescribeClass.get_default_conv_shape(64),MatrixDescribeClass.get_default_strides())
     
+    conv_layer_two = CNNPoolLayerDescriBean(conv_matrix_bean_two,pool_matrix_bean)
+
+    #第五层全连接层
+    nn_layer_one = NNLayerDescribeBean(512,1)
+    #第六层全连接层
+    nn_layer_two = NNLayerDescribeBean(input_request_bean.all_bean()[-1].shape(),0)
     
-    pool_matrix_bean = MatrixDescribeClass
-    (MatrixDescribeClass.get_default_pool_shape(),MatrixDescribeClass.get_default_strides())
+    all_bean = [conv_layer_one,conv_layer_two,nn_layer_one,nn_layer_two]
     
-    temp_result = cnn_layer_calculate(x,"layer_one",conv_matrix_bean_one,pool_matrix_bean);
+    use_request = ModelMakeRequestBean(all_bean,input_request_bean.x_shape())
     
-    temp_result = cnn_layer_calculate(temp_result,"layer_two",conv_matrix_bean_two,pool_matrix_bean);
-    
-    pass    
-    
-def define_cnn_calculate():
+    return define_cnn_calculate(use_request)
+   
+def define_cnn_calculate(input_request_bean):
     '''
     定义一个卷积神经元网络计算
     '''
+    x = make_one_placeholder(input_request_bean.x_shape())
     
-    pass
+    temp_result = x
+    
+    has_reShape = False
+    
+    last_nn_shape = 0
+    
+    #循环建立网络
+    for index,one_bean in enumerate(input_request_bean.all_bean()):
+        if isinstance(one_bean, CNNPoolLayerDescriBean) and (not has_reShape):
+            #卷积+池化计算
+            temp_result = cnn_layer_calculate(temp_result,"cnn_pool_layer" + str(index),one_bean.conv_shape_bean(),one_bean.pool_shape_bean())
+        #当开始全连接层时
+        if isinstance(one_bean, NNLayerDescribeBean):
+            #最初时开始调整Shape
+            if not has_reShape:
+                #重置标签
+                has_reShape =  True
+                result_shape = temp_result.get_shape()
+                #获取长、宽、深
+                all_rank = result_shape[1]*result_shape[2]*result_shape[3]
+                #shape合并
+                temp_result = tf.reshape(temp_result, [result_shape[0],all_rank])
+                #设置nn层形状传递
+                last_nn_shape = all_rank
+            #形成nn层形状 权值矩阵 偏移值矩阵      
+            temp_shape = [last_nn_shape,one_bean.shape()]
+            temp_weight = make_variable(temp_shape,"nn_weight_layer" + str(index))
+            temp_basies = make_biases(temp_shape, "nn_basies_layer" + str(index))
+            
+            #全连接层计算
+            temp_result = make_layer_calculate(temp_result,temp_weight,temp_basies)
+            temp_result = make_layer_active(temp_result,one_bean.active_kind())
+            #设置nn层形状传递
+            last_nn_shape = temp_shape[1]
+            
+    return temp_result
 
 
   
