@@ -227,7 +227,18 @@ def let_net_5_calculate(input_value_shape):
     
     x = make_shape(input_value_shape)
     
+    conv_matrix_bean_one = MatrixDescribeClass
+    (MatrixDescribeClass.get_default_conv_shape(32),MatrixDescribeClass.get_default_strides())
     
+    conv_matrix_bean_two = MatrixDescribeClass
+    (MatrixDescribeClass.get_default_conv_shape(64),MatrixDescribeClass.get_default_strides())
+    
+    pool_matrix_bean = MatrixDescribeClass
+    (MatrixDescribeClass.get_default_pool_shape(),MatrixDescribeClass.get_default_strides())
+    
+    temp_result = cnn_layer_calculate(x,"layer_one",conv_matrix_bean_one,pool_matrix_bean);
+    
+    temp_result = cnn_layer_calculate(temp_result,"layer_two",conv_matrix_bean_two,pool_matrix_bean);
     
     pass    
     
