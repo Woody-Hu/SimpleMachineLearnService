@@ -223,7 +223,12 @@ def cnn_layer_calculate(input_value,input_layer_name,input_conv_matrix_bean,
     
     return None
     
-def let_net_5_calculate():
+def let_net_5_calculate(input_value_shape):
+    
+    x = make_shape(input_value_shape)
+    
+    
+    
     pass    
     
 

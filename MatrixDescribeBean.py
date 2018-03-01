@@ -35,8 +35,8 @@ class MatrixDescribeClass(object):
         return (5,5,input_deep)
     
     @classmethod
-    def get_default_pool_shape(cls,input_deep):
-        return (2,2,input_deep)
+    def get_default_pool_shape(cls):
+        return (2,2)
     
     @classmethod
     def get_default_strides(cls):
