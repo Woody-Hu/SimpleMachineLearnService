@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+
 '''
-Created on 2018Äê2ÔÂ28ÈÕ
+Created on 2018ï¿½ï¿½2ï¿½ï¿½28ï¿½ï¿½
 
 @author: Administrator
 '''

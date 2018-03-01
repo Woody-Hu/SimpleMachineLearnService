@@ -12,6 +12,8 @@ from ShapeDescribeBean import ShapeDescribeClass
 
 from MatrixDescribeBean import MatrixDescribeClass
 
+from collections import Iterable
+
 import tensorflow as tf
 
 def make_variable(shpae,useName,useStddev = 1):
@@ -69,12 +71,25 @@ def prepare_palceholder(inputShapeDescribe):
     
     yShape = inputShapeDescribe[-1].shape
     
-    x = tf.placeholder(tf.float64, shape = (None,xShape))
+    x = make_one_placeholder(xShape)
     
-    y_ = tf.placeholder(tf.float64,shape = (None,yShape))
+    y_ = make_one_placeholder(yShape)
     
     return x,y_
 
+def make_one_placeholder(inputShape):
+    temp_lst =[]
+    temp_lst.append(None)
+    
+    if isinstance(inputShape, int):
+        temp_lst.append(inputShape)
+    elif isinstance(inputShape, Iterable):
+        for one_shape in inputShape:
+            temp_lst.append(one_shape)
+            
+    temp_placeholder = tf.placeholder(tf.float64,shape = tuple(temp_lst))
+    return temp_placeholder;
+    
 def forward_caculate(inputShapeDescribe,if_get_y_ = False):
     '''
     全连接神经网络向前计算接口
@@ -208,9 +223,11 @@ def cnn_layer_calculate(input_value,input_layer_name,input_conv_matrix_bean,
     
     return None
     
-    
+def let_net_5_calculate():
+    pass    
     
 
 
-    
+
+  
     
