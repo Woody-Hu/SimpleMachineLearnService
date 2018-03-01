@@ -29,3 +29,15 @@ class MatrixDescribeClass(object):
     @property
     def get_strides(self):
         return self._this_strides
+    
+    @classmethod
+    def get_default_conv_shape(cls,input_deep):
+        return (5,5,input_deep)
+    
+    @classmethod
+    def get_default_pool_shape(cls,input_deep):
+        return (2,2,input_deep)
+    
+    @classmethod
+    def get_default_strides(cls):
+        return (2,2)
