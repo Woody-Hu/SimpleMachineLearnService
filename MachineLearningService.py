@@ -8,7 +8,7 @@ Created on 2018��2��23��
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-from ShapeDescribeBean import ShapeDescribeClass
+from LayerDescribeBean import *
 
 from MatrixDescribeBean import MatrixDescribeClass
 
@@ -63,7 +63,7 @@ def make_layer_active(inputValue,inputKind):
     else:
         return tf.nn.sigmoid(inputValue)
 
-def prepare_palceholder(inputShapeDescribe):
+def prepare_input_output_palceholder(inputShapeDescribe):
     '''
     根据描述制作输入输出占位
     '''
@@ -90,12 +90,12 @@ def make_one_placeholder(inputShape):
     temp_placeholder = tf.placeholder(tf.float64,shape = tuple(temp_lst))
     return temp_placeholder;
     
-def forward_caculate(inputShapeDescribe,if_get_y_ = False):
+def nn_forward_caculate(inputShapeDescribe,if_get_y_ = False):
     '''
     全连接神经网络向前计算接口
     '''
     
-    x,y_ = prepare_palceholder(inputShapeDescribe)
+    x,y_ = prepare_input_output_palceholder(inputShapeDescribe)
     
     useShapes = make_shape(inputShapeDescribe)
     
@@ -137,15 +137,15 @@ def inputCheck(inputShapeDescribe):
     输入检查
     '''
     for val in inputShapeDescribe:
-        if not isinstance(val, ShapeDescribeClass):
+        if not isinstance(val, BaseLayerDescribeBean):
             return False
     return True   
 
-def prediction(inputShapeDescribe,inputX):
+def nn_prediction(inputShapeDescribe,inputX):
     if not inputCheck(inputShapeDescribe):
         raise Exception()
     
-    (result,x) = forward_caculate(inputShapeDescribe)
+    (result,x) = prepare_input_output_palceholder(inputShapeDescribe)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -157,7 +157,7 @@ def train(inputShapeDescribe,inputX,inputY_,input_step = 5000,inputBatchSize = 8
     if not inputCheck(inputShapeDescribe):
         raise Exception()
     
-    (layer_calculate_result,x,y_) = forward_caculate(inputShapeDescribe,True)
+    (layer_calculate_result,x,y_) = nn_forward_caculate(inputShapeDescribe,True)
     
     (tranin_step,cross_entropy) = back_propagation(layer_calculate_result,y_)
     
@@ -223,15 +223,19 @@ def cnn_layer_calculate(input_value,input_layer_name,input_conv_matrix_bean,
     
     return None
     
-def let_net_5_calculate(input_value_shape):
+def let_net_5_calculate(input_value_shape,output_value_shape):
     
+    #声明输入变量
     x = make_shape(input_value_shape)
     
+    #声明第一层卷积层形状定义 （5,5,32） 步长 （1,1,1,1）
     conv_matrix_bean_one = MatrixDescribeClass
     (MatrixDescribeClass.get_default_conv_shape(32),MatrixDescribeClass.get_default_strides())
     
+    #声明第三层卷积层形状定义 （5,5,64） 步长 （1,1,1,1）
     conv_matrix_bean_two = MatrixDescribeClass
     (MatrixDescribeClass.get_default_conv_shape(64),MatrixDescribeClass.get_default_strides())
+    
     
     pool_matrix_bean = MatrixDescribeClass
     (MatrixDescribeClass.get_default_pool_shape(),MatrixDescribeClass.get_default_strides())
@@ -242,7 +246,12 @@ def let_net_5_calculate(input_value_shape):
     
     pass    
     
-
+def define_cnn_calculate():
+    '''
+    定义一个卷积神经元网络计算
+    '''
+    
+    pass
 
 
   
