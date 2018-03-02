@@ -256,7 +256,7 @@ def define_let_net_5_calculate(input_request_bean,input_batch):
     
     use_request = ModelMakeRequestBean(all_bean,input_request_bean.x_shape)
     
-    return define_cnn_calculate(use_request)
+    return define_cnn_calculate(use_request,input_batch)
    
 def define_cnn_calculate(input_request_bean,input_batch):
     '''
