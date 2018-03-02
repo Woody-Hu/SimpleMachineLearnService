@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+
 '''
-Created on 2018Äê3ÔÂ1ÈÕ
+Created on 2018ï¿½ï¿½3ï¿½ï¿½1ï¿½ï¿½
 
 @author: Administrator
 '''
@@ -28,20 +30,20 @@ class ModelMakeRequestBean(object):
     
     def _inputCheck(self):
         
-        if not isinstance(self._all_layer_desctibe_bean, Iterable) or not isinstance(self._x, Iterable)or not isinstance(self._y_shape, Iterable):
+        if not isinstance(self._all_layer_desctibe_bean, Iterable) or not isinstance(self._x_shape, Iterable):
             raise Exception()
         
         if_found_nn = False
         
-        #ÊäÈë¼ì²é
+        #ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         for one_des_bean in self._all_layer_desctibe_bean:
-            #¼ì²éÊÇ·ñ»ù´¡»ùÀà
+            #ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             if not isinstance(one_des_bean, BaseLayerDescribeBean):
                 raise Exception()
-            #Ö»ÒªÓÐcnn·â×°ÔòÉèÎªcnnÄ£Ê½
+            #Ö»Òªï¿½ï¿½cnnï¿½ï¿½×°ï¿½ï¿½ï¿½ï¿½ÎªcnnÄ£Ê½
             elif (not self._if_use_cnn) and isinstance(one_des_bean, CNNPoolLayerDescriBean):
                 self._if_use_cnn = True
-            #ÉèÖÃÈ«Á¬½Ó²ãµÄÅÐ¶Ï   
+            #ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½ï¿½Ó²ï¿½ï¿½ï¿½Ð¶ï¿½   
             elif isinstance(one_des_bean, NNLayerDescribeBean) and (not if_found_nn):
                 if_found_nn = True  
             elif if_found_nn and (not isinstance(one_des_bean, NNLayerDescribeBean)):

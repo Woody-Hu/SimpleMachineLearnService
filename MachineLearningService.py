@@ -18,17 +18,25 @@ from ModelMakeRequestBean import ModelMakeRequestBean
 
 import tensorflow as tf
 
-def make_variable(shpae,useName,useStddev = 1):
+from tensorflow.examples.tutorials.mnist import input_data
+
+import numpy as np
+
+
+def make_variable(shpae,useName,useStddev = 0.1):
     '''
     制作变量
     '''
-    return tf.Variable(tf.random_normal(shpae,dtype = tf.float64, stddev = useStddev, name = useName))
+   
+    return tf.Variable(tf.random_normal(shpae,dtype = tf.float32, stddev = useStddev, name = useName))
+  
+        
 
 def make_biases(shpae,useName):
     '''
     制作偏移量
     '''
-    return tf.Variable(tf.zeros(shpae[1], dtype = tf.float64, name = useName) + 0.1)
+    return tf.Variable(tf.zeros(shpae[-1], dtype = tf.float32, name = useName) + 0.1)
 
 def make_shape(inputShapeDescribe):
     '''
@@ -89,7 +97,7 @@ def make_one_placeholder(inputShape):
         for one_shape in inputShape:
             temp_lst.append(one_shape)
             
-    temp_placeholder = tf.placeholder(tf.float64,shape = tuple(temp_lst))
+    temp_placeholder = tf.placeholder(tf.float32,shape = tuple(temp_lst))
     return temp_placeholder;
     
 def nn_forward_caculate(inputShapeDescribe,if_get_y_ = False):
@@ -189,7 +197,7 @@ def get_variable_lastShape(input_variable):
     '''
     获得输入变量的最后一阶的形状描述
     '''
-    return input_variable.get_shape()[-1]
+    return input_variable.get_shape().as_list()[-1]
 
 def cnn_layer_calculate(input_value,input_layer_name,input_conv_matrix_bean,
                         input_pool_matrix_bean,input_active_kind = 1):
@@ -197,17 +205,18 @@ def cnn_layer_calculate(input_value,input_layer_name,input_conv_matrix_bean,
     一层卷积+最大池化计算
     '''
     last_deep = get_variable_lastShape(input_value)
+    
     #制作卷积层权重形状矩阵
-    use_conv_weight = [input_conv_matrix_bean.get_shape()[0],input_conv_matrix_bean.get_shape()[1]
-                      ,last_deep,input_conv_matrix_bean.get_shape()[2]]
+    use_conv_weight = [input_conv_matrix_bean.get_shape[0],input_conv_matrix_bean.get_shape[1]
+                      ,last_deep,input_conv_matrix_bean.get_shape[2]]
     #制作卷积层偏移形状矩阵
-    use_conve_biases = [input_conv_matrix_bean.get_shape()[2]]
+    use_conve_biases = [input_conv_matrix_bean.get_shape[2]]
     #制作卷积层步长矩阵
-    use_conv_strides = [1,input_conv_matrix_bean.get_strides()[0],input_conv_matrix_bean.get_strides()[1],1]
+    use_conv_strides = [1,input_conv_matrix_bean.get_strides[0],input_conv_matrix_bean.get_strides[1],1]
     #池化层的形状矩阵
-    use_pool_shape = [1,input_pool_matrix_bean.get_shape()[0],input_pool_matrix_bean.get_shape()[1],1]
+    use_pool_shape = [1,input_pool_matrix_bean.get_shape[0],input_pool_matrix_bean.get_shape[1],1]
     #池化层的步长矩阵
-    use_pool_strides = [1,input_pool_matrix_bean.get_strides()[0],input_pool_matrix_bean.get_strides()[1],1]
+    use_pool_strides = [1,input_pool_matrix_bean.get_strides[0],input_pool_matrix_bean.get_strides[1],1]
     
     
     with tf.variable_scope(input_layer_name):
@@ -223,39 +232,37 @@ def cnn_layer_calculate(input_value,input_layer_name,input_conv_matrix_bean,
     
     return None
     
-def define_let_net_5_calculate(input_request_bean):
+def define_let_net_5_calculate(input_request_bean,input_batch):
      
     #声明第一层卷积层形状定义 （5,5,32） 步长 （1,1,1,1）
-    conv_matrix_bean_one = MatrixDescribeClass
-    (MatrixDescribeClass.get_default_conv_shape(32),MatrixDescribeClass.get_default_strides())
+    conv_matrix_bean_one = MatrixDescribeClass(MatrixDescribeClass.get_default_conv_shape(32),MatrixDescribeClass.get_default_strides())
     
-    pool_matrix_bean = MatrixDescribeClass
-    (MatrixDescribeClass.get_default_pool_shape(),MatrixDescribeClass.get_default_strides())
+    pool_matrix_bean = MatrixDescribeClass(MatrixDescribeClass.get_default_pool_shape(),MatrixDescribeClass.get_default_strides())
     
     conv_layer_one = CNNPoolLayerDescriBean(conv_matrix_bean_one,pool_matrix_bean)
     
     #声明第三层卷积层形状定义 （5,5,64） 步长 （1,1,1,1）
-    conv_matrix_bean_two = MatrixDescribeClass
-    (MatrixDescribeClass.get_default_conv_shape(64),MatrixDescribeClass.get_default_strides())
+    conv_matrix_bean_two = MatrixDescribeClass(MatrixDescribeClass.get_default_conv_shape(64),MatrixDescribeClass.get_default_strides())
     
     conv_layer_two = CNNPoolLayerDescriBean(conv_matrix_bean_two,pool_matrix_bean)
 
     #第五层全连接层
     nn_layer_one = NNLayerDescribeBean(512,1)
+    
     #第六层全连接层
-    nn_layer_two = NNLayerDescribeBean(input_request_bean.all_bean()[-1].shape(),0)
+    nn_layer_two = NNLayerDescribeBean(input_request_bean.all_bean[-1].shape,0)
     
     all_bean = [conv_layer_one,conv_layer_two,nn_layer_one,nn_layer_two]
     
-    use_request = ModelMakeRequestBean(all_bean,input_request_bean.x_shape())
+    use_request = ModelMakeRequestBean(all_bean,input_request_bean.x_shape)
     
     return define_cnn_calculate(use_request)
    
-def define_cnn_calculate(input_request_bean):
+def define_cnn_calculate(input_request_bean,input_batch):
     '''
     定义一个卷积神经元网络计算
     '''
-    x = make_one_placeholder(input_request_bean.x_shape())
+    x = make_one_placeholder(input_request_bean.x_shape)
     
     temp_result = x
     
@@ -264,36 +271,87 @@ def define_cnn_calculate(input_request_bean):
     last_nn_shape = 0
     
     #循环建立网络
-    for index,one_bean in enumerate(input_request_bean.all_bean()):
+    for index,one_bean in enumerate(input_request_bean.all_bean):
         if isinstance(one_bean, CNNPoolLayerDescriBean) and (not has_reShape):
             #卷积+池化计算
-            temp_result = cnn_layer_calculate(temp_result,"cnn_pool_layer" + str(index),one_bean.conv_shape_bean(),one_bean.pool_shape_bean())
+            temp_result = cnn_layer_calculate(temp_result,"cnn_pool_layer" + str(index),one_bean.conv_shape_bean,one_bean.pool_shape_bean)
         #当开始全连接层时
         if isinstance(one_bean, NNLayerDescribeBean):
             #最初时开始调整Shape
             if not has_reShape:
                 #重置标签
                 has_reShape =  True
-                result_shape = temp_result.get_shape()
+                result_shape = temp_result.get_shape().as_list()
                 #获取长、宽、深
                 all_rank = result_shape[1]*result_shape[2]*result_shape[3]
                 #shape合并
-                temp_result = tf.reshape(temp_result, [result_shape[0],all_rank])
+                temp_result = tf.reshape(temp_result, [input_batch,all_rank])
                 #设置nn层形状传递
                 last_nn_shape = all_rank
             #形成nn层形状 权值矩阵 偏移值矩阵      
-            temp_shape = [last_nn_shape,one_bean.shape()]
+            temp_shape = [last_nn_shape,one_bean.shape]
             temp_weight = make_variable(temp_shape,"nn_weight_layer" + str(index))
             temp_basies = make_biases(temp_shape, "nn_basies_layer" + str(index))
             
             #全连接层计算
             temp_result = make_layer_calculate(temp_result,temp_weight,temp_basies)
-            temp_result = make_layer_active(temp_result,one_bean.active_kind())
+            temp_result = make_layer_active(temp_result,one_bean.active_kind)
             #设置nn层形状传递
             last_nn_shape = temp_shape[1]
             
-    return temp_result
+    return x,temp_result
 
+def test_x_reshape(input_batch_size,input_x):
+    return np.reshape(input_x,[input_batch_size,28,28,1])
+
+minist = input_data.read_data_sets("/path/to/MINIST_data/",one_hot= True)
+
+
+use_x_shape =(28,28,1)
+use_y_shape = 10
+
+use_nn_layer_shape = NNLayerDescribeBean(use_y_shape)
+
+use_request_bean = ModelMakeRequestBean([use_nn_layer_shape,],use_x_shape)
+
+batch_size = 500
+
+(x,y) = define_let_net_5_calculate(use_request_bean,batch_size)
+
+y_ = make_one_placeholder(use_y_shape)
+
+cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits = y,labels = tf.argmax(y_, 1))
+
+cross_entropy_mean = tf.reduce_mean(cross_entropy)
+
+correct_p = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+
+accuracy = tf.reduce_mean(tf.cast(correct_p,tf.float32))
+
+tranin_step = tf.train.AdamOptimizer(0.001).minimize(cross_entropy_mean)
+
+
+
+with tf.Session() as sess:
+    tf.global_variables_initializer().run()
+    
+    for i in range(30000):
+        xs,ys = minist.train.next_batch(batch_size)
+        n_xs = test_x_reshape(batch_size,xs)
+        
+        y_result,loss,step = sess.run((y,cross_entropy_mean,tranin_step),feed_dict ={x:n_xs,y_:ys })
+        
+        if i % 1 == 0:
+            xe,ye = minist.validation.next_batch(batch_size)
+            xe = test_x_reshape(batch_size, xe)
+            acc = sess.run(accuracy,feed_dict = {x:xe,y_:ye})
+            print(loss)
+            print(acc)
+            print("")
+        
+        
+
+       
 
   
     

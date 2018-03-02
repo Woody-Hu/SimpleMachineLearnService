@@ -40,4 +40,4 @@ class MatrixDescribeClass(object):
     
     @classmethod
     def get_default_strides(cls):
-        return (2,2)
+        return (1,1)
