@@ -16,12 +16,24 @@ from collections import Iterable
 
 from ModelMakeRequestBean import ModelMakeRequestBean
 
-import tensorflow as tf
-
 from tensorflow.examples.tutorials.mnist import input_data
 
 import numpy as np
 
+import tensorflow as tf
+
+def make_one_placeholder(inputShape):
+    temp_lst =[]
+    temp_lst.append(None)
+    
+    if isinstance(inputShape, int):
+        temp_lst.append(inputShape)
+    elif isinstance(inputShape, Iterable):
+        for one_shape in inputShape:
+            temp_lst.append(one_shape)
+            
+    temp_placeholder = tf.placeholder(tf.float32,shape = tuple(temp_lst))
+    return temp_placeholder;
 
 def make_variable(shpae,useName,useStddev = 0.1):
     '''
@@ -30,8 +42,6 @@ def make_variable(shpae,useName,useStddev = 0.1):
    
     return tf.Variable(tf.random_normal(shpae,dtype = tf.float32, stddev = useStddev, name = useName))
   
-        
-
 def make_biases(shpae,useName):
     '''
     制作偏移量
@@ -72,40 +82,13 @@ def make_layer_active(inputValue,inputKind):
         return tf.nn.tanh(inputValue)
     else:
         return tf.nn.sigmoid(inputValue)
-
-def prepare_input_output_palceholder(inputShapeDescribe):
-    '''
-    根据描述制作输入输出占位
-    '''
-    xShape = inputShapeDescribe[0].shape
-    
-    yShape = inputShapeDescribe[-1].shape
-    
-    x = make_one_placeholder(xShape)
-    
-    y_ = make_one_placeholder(yShape)
-    
-    return x,y_
-
-def make_one_placeholder(inputShape):
-    temp_lst =[]
-    temp_lst.append(None)
-    
-    if isinstance(inputShape, int):
-        temp_lst.append(inputShape)
-    elif isinstance(inputShape, Iterable):
-        for one_shape in inputShape:
-            temp_lst.append(one_shape)
-            
-    temp_placeholder = tf.placeholder(tf.float32,shape = tuple(temp_lst))
-    return temp_placeholder;
-    
+  
 def nn_forward_caculate(inputShapeDescribe,if_get_y_ = False):
     '''
     全连接神经网络向前计算接口
     '''
-    
-    x,y_ = prepare_input_output_palceholder(inputShapeDescribe)
+    x  = make_one_placeholder(inputShapeDescribe[0].shape)
+    y_ = make_one_placeholder(inputShapeDescribe[-1].shape)
     
     useShapes = make_shape(inputShapeDescribe)
     
@@ -115,7 +98,6 @@ def nn_forward_caculate(inputShapeDescribe,if_get_y_ = False):
     base_weight_str = 'weight'
     base_biases_str ="biases"
     
-
     for index,val in enumerate(useShapes):
         weights.append(make_variable(val,useName = base_weight_str + str(index)))
         biases.append(make_biases(val,useName = base_biases_str + str(index)))
@@ -134,64 +116,12 @@ def nn_forward_caculate(inputShapeDescribe,if_get_y_ = False):
         return layer_calculate_result,x
     
 def back_propagation(inputResult,inputY_):
-    cross_entropy = -tf.reduce_mean(inputY_*tf.log(inputResult)) 
     learning_reat = 0.001
-    tranin_step = tf.train.AdamOptimizer(learning_reat).minimize(cross_entropy)
+    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits = y,labels = tf.argmax(y_, 1))
+    cross_entropy_mean = tf.reduce_mean(cross_entropy)
+    tranin_step = tf.train.AdamOptimizer(learning_reat).minimize(cross_entropy_mean)
     
     return tranin_step,cross_entropy
-
-def inputCheck(inputShapeDescribe):
-    '''
-    输入检查
-    '''
-    for val in inputShapeDescribe:
-        if not isinstance(val, BaseLayerDescribeBean):
-            return False
-    return True   
-
-def nn_prediction(inputShapeDescribe,inputX):
-    if not inputCheck(inputShapeDescribe):
-        raise Exception()
-    
-    (result,x) = prepare_input_output_palceholder(inputShapeDescribe)
-
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        resultValue = sess.run(result,feed_dict = {x:inputX})
-
-    return resultValue
-
-def train(inputShapeDescribe,inputX,inputY_,input_step = 5000,inputBatchSize = 8, use_save_path = None):
-    if not inputCheck(inputShapeDescribe):
-        raise Exception()
-    
-    (layer_calculate_result,x,y_) = nn_forward_caculate(inputShapeDescribe,True)
-    
-    (tranin_step,cross_entropy) = back_propagation(layer_calculate_result,y_)
-    
-    input_data_size = len(inputY_)
-    
-    returnValue = []
-    
-    if use_save_path != None:
-        saver = tf.train.Saver();
-    
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        for i in range(input_step):
-            start = i*inputBatchSize
-            end = min(start + inputBatchSize, input_data_size)
-            if start > end:
-                start = end
-            sess.run(tranin_step,feed_dict = {x:inputX[start:end],y_:inputY_[start:end]})
-            if i % 1000 == 0:
-                tempValue = sess.run(cross_entropy,feed_dict = {x:inputX,y_:inputY_})
-                returnValue.append('after %d steps cross_entropy is %g'%(i,tempValue))    
-        
-        if use_save_path != None:
-            saver.save(sess, use_save_path)
-                            
-    return returnValue
 
 def get_variable_lastShape(input_variable):
     '''
@@ -301,11 +231,71 @@ def define_cnn_calculate(input_request_bean,input_batch):
             
     return x,temp_result
 
+def defin_result_accuracty(y,y_):
+    correct_p = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+    accuracy = tf.reduce_mean(tf.cast(correct_p,tf.float32))
+    return accuracy
+
+def inputCheck(inputShapeDescribe):
+    '''
+    输入检查
+    '''
+    for val in inputShapeDescribe:
+        if not isinstance(val, BaseLayerDescribeBean):
+            return False
+    return True   
+
+
+
+
+def nn_prediction(inputShapeDescribe,inputX):
+    if not inputCheck(inputShapeDescribe):
+        raise Exception()
+    
+    (result,x) = nn_forward_caculate(inputShapeDescribe)
+
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        resultValue = sess.run(result,feed_dict = {x:inputX})
+
+    return resultValue
+
+def train(inputShapeDescribe,inputX,inputY_,input_step = 5000,inputBatchSize = 8, use_save_path = None):
+    if not inputCheck(inputShapeDescribe):
+        raise Exception()
+    
+    (layer_calculate_result,x,y_) = nn_forward_caculate(inputShapeDescribe,True)
+    
+    (tranin_step,cross_entropy) = back_propagation(layer_calculate_result,y_)
+    
+    input_data_size = len(inputY_)
+    
+    returnValue = []
+    
+    if use_save_path != None:
+        saver = tf.train.Saver();
+    
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        for i in range(input_step):
+            start = i*inputBatchSize
+            end = min(start + inputBatchSize, input_data_size)
+            if start > end:
+                start = end
+            sess.run(tranin_step,feed_dict = {x:inputX[start:end],y_:inputY_[start:end]})
+            if i % 1000 == 0:
+                tempValue = sess.run(cross_entropy,feed_dict = {x:inputX,y_:inputY_})
+                returnValue.append('after %d steps cross_entropy is %g'%(i,tempValue))    
+        
+        if use_save_path != None:
+            saver.save(sess, use_save_path)
+                            
+    return returnValue
+
 def test_x_reshape(input_batch_size,input_x):
     return np.reshape(input_x,[input_batch_size,28,28,1])
 
 minist = input_data.read_data_sets("/path/to/MINIST_data/",one_hot= True)
-
 
 use_x_shape =(28,28,1)
 use_y_shape = 10
@@ -320,17 +310,9 @@ batch_size = 500
 
 y_ = make_one_placeholder(use_y_shape)
 
-cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits = y,labels = tf.argmax(y_, 1))
+accuracy = defin_result_accuracty(y,y_)
 
-cross_entropy_mean = tf.reduce_mean(cross_entropy)
-
-correct_p = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
-
-accuracy = tf.reduce_mean(tf.cast(correct_p,tf.float32))
-
-tranin_step = tf.train.AdamOptimizer(0.001).minimize(cross_entropy_mean)
-
-
+tranin_step,cross_entropy_mean = back_propagation(y,y_)
 
 with tf.Session() as sess:
     tf.global_variables_initializer().run()
