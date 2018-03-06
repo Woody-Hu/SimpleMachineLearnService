@@ -245,7 +245,11 @@ def inputCheck(inputShapeDescribe):
             return False
     return True   
 
-
+def sess_resotre(input_sess,input_path):
+    saver = tf.train.Saver()
+    saver.restore(input_sess, input_path)
+    return None
+    
 
 
 def nn_prediction(inputShapeDescribe,inputX):
