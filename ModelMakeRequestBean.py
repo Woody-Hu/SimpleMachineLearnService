@@ -20,12 +20,15 @@ class ModelMakeRequestBean(object):
     
     _if_use_cnn = False
     
-    def __init__(self, input_all_layer_desctibe_bean,input_x):
+    _if_use_let_net_5 = False
+    
+    def __init__(self, input_all_layer_desctibe_bean,input_x,input_if_use_let_net_5 = False):
         '''
         Constructor
         '''
         self._all_layer_desctibe_bean = input_all_layer_desctibe_bean
         self._x_shape = input_x
+        self._if_use_let_net_5 = input_if_use_let_net_5
         self._inputCheck()
     
     def _inputCheck(self):
@@ -63,3 +66,6 @@ class ModelMakeRequestBean(object):
     def if_use_cnn(self):
         return self._if_use_cnn
     
+    @property
+    def if_use_let_net_5(self):
+        return self._if_use_let_net_5

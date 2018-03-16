@@ -308,7 +308,7 @@ use_nn_layer_shape = NNLayerDescribeBean(use_y_shape)
 
 use_request_bean = ModelMakeRequestBean([use_nn_layer_shape,],use_x_shape)
 
-batch_size = 500
+batch_size = 10
 
 (x,y) = define_let_net_5_calculate(use_request_bean,batch_size)
 
@@ -318,10 +318,13 @@ accuracy = defin_result_accuracty(y,y_)
 
 tranin_step,cross_entropy_mean = back_propagation(y,y_)
 
+saver = tf.train.Saver();
+
 with tf.Session() as sess:
-    tf.global_variables_initializer().run()
+    #tf.global_variables_initializer().run()
+    saver.restore(sess, "C:/b.ckpt")
     
-    for i in range(30000):
+    for i in range(50000):
         xs,ys = minist.train.next_batch(batch_size)
         n_xs = test_x_reshape(batch_size,xs)
         
@@ -335,7 +338,8 @@ with tf.Session() as sess:
             print(acc)
             print("")
         
-        
+    saver.save(sess, "C:/b.ckpt")
+    print("over")    
 
        
 

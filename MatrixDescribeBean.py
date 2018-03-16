@@ -6,7 +6,7 @@ Created on 2018��2��28��
 @author: Administrator
 '''
 
-class MatrixDescribeClass(object):
+class MatrixDescribeBean(object):
     '''
     classdocs
     '''
