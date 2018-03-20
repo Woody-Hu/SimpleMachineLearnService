@@ -47,6 +47,15 @@ class MongoDbInterface(object):
             self.change_collection(collection_name)
         return self.use_collection.find(kw)   
     
+    def reomve(self,collection_name = None , **kw):
+        if not collection_name is None:
+            self.change_collection(collection_name)
+        
+	if not kw is None:
+            self.remove(kw)
+        else:
+	    self.remove()
+
     def __del__(self):
         self.use_connection.close()
 
