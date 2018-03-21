@@ -33,12 +33,21 @@ class MongoDbInterface(object):
         self.change_collection(collection_name)
         self.use_collection.update(where_value,{"$set":update_values},True)  
 
-    def find_all(self):
-        return self.use_collection.find()
-    
-    def find(self,collection_name = None , **kw):
+    def find_all(self,limit_value = None,skip_value = None):
+        
+        temp_value = self.use_collection.find();
+        if not limit_value is None and not skip_value is None:
+            return self.use_collection.find().limit(limit_value)
+        else:
+            return temp_value
+        
+    def find(self,collection_name = None,limit_value = None,skip_value = None, **kw):
         self.change_collection(collection_name)
-        return self.use_collection.find(kw)   
+        temp_value = self.use_collection.find(kw)  
+        if not limit_value is None and not skip_value is None:
+            return self.use_collection.find().limit(limit_value)
+        else:
+            return temp_value 
     
     def reomve(self,collection_name = None , **kw):
         self.change_collection(collection_name)
