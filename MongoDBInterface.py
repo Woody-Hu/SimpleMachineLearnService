@@ -5,10 +5,7 @@ Created on 2018年3月20日
 '''
 
 from pymongo import MongoClient
-from Singletondecorator import *
   
-
-@singleton
 class MongoDbInterface(object):   
     
     def __init__(self):
@@ -26,7 +23,6 @@ class MongoDbInterface(object):
        
     def insert_value(self,collection_name = None , **kw): 
         self.change_collection(collection_name)
-
         self.use_collection.insert(kw)
 
     def insert_many_value(self,input_values,collection_name = None):
@@ -55,4 +51,4 @@ class MongoDbInterface(object):
     def __del__(self):
         self.use_connection.close()
  
-         
+
