@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 '''
 Created on 2018年3月20日
 
@@ -28,17 +28,8 @@ class MongoDbInterface(object):
         if not collection_name is None:
             self.change_collection(collection_name)
         self.use_collection.insert(kw)
-
-    def insert_many_value(self,collection_name = None,input_values)
-        if not collection_name is None:
-            self.change_collection(collection_name)
-        self.use_collection.insert_many(input_values)
         
-    def update_value(self,collection_name = None,where_value,update_values)
-        if not collection_name is None:
-            self.change_collection(collection_name)
-        self.use_collection.update(where_value,{"$set":update_values,True})  
-
+    
     def find_all(self):
         return self.use_collection.find()
     
@@ -47,18 +38,8 @@ class MongoDbInterface(object):
             self.change_collection(collection_name)
         return self.use_collection.find(kw)   
     
-    def reomve(self,collection_name = None , **kw):
-        if not collection_name is None:
-            self.change_collection(collection_name)
-        
-	if not kw is None:
-            self.remove(kw)
-        else:
-	    self.remove()
-
     def __del__(self):
         self.use_connection.close()
-
         
     
     

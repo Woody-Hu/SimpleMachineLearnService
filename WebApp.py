@@ -82,6 +82,6 @@ def json_transform(strJ):
 
 
 if __name__ == '__main__':
-    #app.run() 
-
-       
+    #test_str = '{"isCNN":true,"isUseLetNet5":false,"input_shape":[10],"output_shape":[1],"inner_shape":[{"isCNNLayer":false,"useActiveKind":0,"use_shape":[5]}]}'
+    #data = json_transform(test_str)
+    print("test")
