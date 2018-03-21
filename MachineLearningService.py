@@ -10,7 +10,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from LayerDescribeBean import *
 
-from MatrixDescribeBean import MatrixDescribeClass
+from MatrixDescribeBean import MatrixDescribeBean
 
 from collections import Iterable
 
@@ -165,14 +165,14 @@ def cnn_layer_calculate(input_value,input_layer_name,input_conv_matrix_bean,
 def define_let_net_5_calculate(input_request_bean,input_batch):
      
     #声明第一层卷积层形状定义 （5,5,32） 步长 （1,1,1,1）
-    conv_matrix_bean_one = MatrixDescribeClass(MatrixDescribeClass.get_default_conv_shape(32),MatrixDescribeClass.get_default_strides())
+    conv_matrix_bean_one = MatrixDescribeBean(MatrixDescribeBean.get_default_conv_shape(32),MatrixDescribeBean.get_default_strides())
     
-    pool_matrix_bean = MatrixDescribeClass(MatrixDescribeClass.get_default_pool_shape(),MatrixDescribeClass.get_default_strides())
+    pool_matrix_bean = MatrixDescribeBean(MatrixDescribeBean.get_default_pool_shape(),MatrixDescribeBean.get_default_strides())
     
     conv_layer_one = CNNPoolLayerDescriBean(conv_matrix_bean_one,pool_matrix_bean)
     
     #声明第三层卷积层形状定义 （5,5,64） 步长 （1,1,1,1）
-    conv_matrix_bean_two = MatrixDescribeClass(MatrixDescribeClass.get_default_conv_shape(64),MatrixDescribeClass.get_default_strides())
+    conv_matrix_bean_two = MatrixDescribeBean(MatrixDescribeBean.get_default_conv_shape(64),MatrixDescribeBean.get_default_strides())
     
     conv_layer_two = CNNPoolLayerDescriBean(conv_matrix_bean_two,pool_matrix_bean)
 
