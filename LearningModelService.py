@@ -21,6 +21,12 @@ _str_x_value="xvalue"
 
 _str_y_value="yvalue"
 
+_use_name_ckptfile_collection ="ckptfiles"
+
+_use_name_metafile_collection ="ckptfiles"
+
+_use_name_checkpointfile_collection ="checkpointfiles"
+
 def model_name_check(if_need_model):
     def model_name_check_warp(func):
         def _model_name_check(*args,**kw):
@@ -58,6 +64,22 @@ class LearningModelService:
     def insert_model(self,input_name,input_json):
         self._useDb.insert_value(name = input_name,useJson = input_json)
         return True
+    
+    @model_name_check(True)
+    def insert_modelfile(self,input_name,input_ckpt_file,input_metafile,input_checkpointfile):
+        self._useDb.del_file(_use_name_ckptfile_collection, input_name)
+        self._useDb.del_file(_use_name_metafile_collection, input_name)
+        self._useDb.del_file(_use_name_checkpointfile_collection, input_name)
+        self._useDb.insert_file(_use_name_ckptfile_collection, input_name, input_ckpt_file)
+        self._useDb.insert_file(_use_name_metafile_collection, input_name, input_metafile)
+        self._useDb.insert_file(_use_name_checkpointfile_collection, input_name, input_checkpointfile)
+    
+    @model_name_check(True)
+    def get_modelfile(self,input_name,input_ckpt_file,input_metafile,input_checkpointfile):  
+        self._useDb.get_file(_use_name_ckptfile_collection, input_name, input_ckpt_file) 
+        self._useDb.get_file(_use_name_metafile_collection, input_name, input_metafile) 
+        self._useDb.get_file(_use_name_checkpointfile_collection, input_name, input_checkpointfile) 
+    
     
     @model_name_check(True)
     def get_model_json(self,input_name):
