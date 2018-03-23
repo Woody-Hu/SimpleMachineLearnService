@@ -21,6 +21,8 @@ _str_x_value="xvalue"
 
 _str_y_value="yvalue"
 
+_str_name='name'
+
 _use_name_ckptfile_collection ="ckptfiles"
 
 _use_name_metafile_collection ="ckptfiles"
@@ -47,7 +49,7 @@ class LearningModelService:
         pass
     
     def if_contains_model_name(self,input_name):
-        if 0 != (self._useDb.find(name = input_name).retrieved):
+        if 0 != (self._useDb.find(name = input_name).count()):
             return True
         else:
             return False
@@ -57,7 +59,7 @@ class LearningModelService:
         return_value = []
         
         for one_value in find_vlaue:
-            return_value.append(one_value)
+            return_value.append(one_value[_str_name])
         return return_value    
      
     @model_name_check(False)
@@ -79,8 +81,7 @@ class LearningModelService:
         self._useDb.get_file(_use_name_ckptfile_collection, input_name, input_ckpt_file) 
         self._useDb.get_file(_use_name_metafile_collection, input_name, input_metafile) 
         self._useDb.get_file(_use_name_checkpointfile_collection, input_name, input_checkpointfile) 
-    
-    
+        
     @model_name_check(True)
     def get_model_json(self,input_name):
         return self._useDb.find(name = input_name)[0][_str_use_json]
@@ -94,11 +95,11 @@ class LearningModelService:
         self._insert_model_result_value(input_name + _use_name_suffix_evaluate_value,input_x_values,input_y_values)
     
     @model_name_check(True)
-    def get_train_value(self,input_name,input_limit,input_skip):
+    def get_train_value(self,input_name,input_limit = None,input_skip = None):
         return self._get_model_result_value(input_name + _use_name_suffix_train_value,input_limit,input_skip)
     
     @model_name_check(True)
-    def get_evaluate_value(self,input_name,input_limit,input_skip):
+    def get_evaluate_value(self,input_name,input_limit = None,input_skip = None):
         return self._get_model_result_value(input_name + _use_name_suffix_evaluate_value,input_limit,input_skip)
     
     def _get_model_result_value(self,input_collection_name,input_limit,input_skip):
@@ -127,4 +128,11 @@ class LearningModelService:
         #当前表回置
         self._useDb.change_collection(_use_name_collection)   
         
-    
+
+a = LearningModelService()
+
+a.insert_modelfile('testName', r"c:\a\ckpt.txt", r"c:\a\meta.txt", r"c:\a\checkpoint.txt")
+
+a.get_modelfile('testName', r"c:\b\ckpt.txt", r"c:\b\meta.txt", r"c:\b\checkpoint.txt")
+
+print("over")

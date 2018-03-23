@@ -44,7 +44,7 @@ class MongoDbInterface(object):
         
     def find(self,collection_name = None,limit_value = None,skip_value = None, **kw):
         self.change_collection(collection_name)
-        temp_value = self.use_collection.find(kw)  
+        temp_value = self.use_collection.find(kw)
         if not limit_value is None and not skip_value is None:
             return self.use_collection.find().limit(limit_value)
         else:
