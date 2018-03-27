@@ -128,11 +128,3 @@ class LearningModelService:
         #当前表回置
         self._useDb.change_collection(_use_name_collection)   
         
-
-a = LearningModelService()
-
-a.insert_modelfile('testName', r"c:\a\ckpt.txt", r"c:\a\meta.txt", r"c:\a\checkpoint.txt")
-
-a.get_modelfile('testName', r"c:\b\ckpt.txt", r"c:\b\meta.txt", r"c:\b\checkpoint.txt")
-
-print("over")
