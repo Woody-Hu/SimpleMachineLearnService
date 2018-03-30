@@ -127,4 +127,5 @@ class LearningModelService:
         self._useDb.insert_many_value(values, input_collection_name)
         #当前表回置
         self._useDb.change_collection(_use_name_collection)   
-        
+
+

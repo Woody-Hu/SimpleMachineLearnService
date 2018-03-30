@@ -20,7 +20,60 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 import numpy as np
 
+from Singletondecorator import singleton
+
 import tensorflow as tf
+
+@singleton
+class MachineLearningService(object):
+    
+    def __init__(self):
+        pass
+
+    def _make_one_placeholder(self,inputShape):
+        temp_lst =[]
+        temp_lst.append(None)
+    
+        if isinstance(inputShape, int):
+            temp_lst.append(inputShape)
+        elif isinstance(inputShape, Iterable):
+            for one_shape in inputShape:
+                temp_lst.append(one_shape)
+            
+        temp_placeholder = tf.placeholder(tf.float32,shape = tuple(temp_lst))
+        return temp_placeholder;
+    
+    def _make_variable(self,shpae,useName,useStddev = 0.1):
+        '''
+        制作变量
+        '''
+        return tf.Variable(tf.random_normal(shpae,dtype = tf.float32, stddev = useStddev, name = useName))
+       
+    def _make_biases(self,shpae,useName):  
+        '''
+                 制作偏移量
+        '''
+        return tf.Variable(tf.zeros(shpae[-1], dtype = tf.float32, name = useName) + 0.1)
+    
+    def _make_shape(self,inputShapeDescribe):
+        returnValue = []
+        lastValue = 0
+        for index, val in enumerate(inputShapeDescribe):
+            if 0 == index:
+                lastValue = val.shape
+                continue
+        tempValue = [lastValue,val.shape]
+        returnValue.append(tempValue)
+        lastValue = val.shape
+        
+        return returnValue
+           
+    def _make_layer_calculate(self,inputValue,inputWeight,inputBiases):
+        '''
+    进行一层神经网络计算
+    '''
+        return tf.matmul(inputValue, inputWeight) + inputBiases
+
 
 def make_one_placeholder(inputShape):
     temp_lst =[]
@@ -36,11 +89,8 @@ def make_one_placeholder(inputShape):
     return temp_placeholder;
 
 def make_variable(shpae,useName,useStddev = 0.1):
-    '''
-    制作变量
-    '''
-   
     return tf.Variable(tf.random_normal(shpae,dtype = tf.float32, stddev = useStddev, name = useName))
+  
   
 def make_biases(shpae,useName):
     '''
