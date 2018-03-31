@@ -19,6 +19,8 @@ app = Flask(__name__)
 
 dbService = LearningModelService()
 
+machine_learning_service = MachineLearningService()
+
 str_Sucess = "SUCESS"
 str_Error = "ERROR"
 
@@ -63,7 +65,7 @@ def add_value():
         return str_Error
     
     return str_Sucess  
-    
+ 
 def json_transform(strJ):
     #获取Json字典
     dictJson = json.loads(strJ)
