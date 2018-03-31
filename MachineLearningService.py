@@ -87,6 +87,18 @@ class MachineLearningService(object):
         else:
             return tf.nn.sigmoid(inputValue)
     
+    def _nn_prediction(self,inputShapeDescribe,inputX):
+        if not self._inputCheck(inputShapeDescribe):
+            raise Exception()
+    
+        (result,x) = self._nn_forward_caculate(inputShapeDescribe)
+
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            resultValue = sess.run(result,feed_dict = {x:inputX})
+
+        return resultValue
+    
     def _nn_forward_caculate(self,inputShapeDescribe,if_get_y_ = False):
         '''
         全连接层向前传播
@@ -130,7 +142,6 @@ class MachineLearningService(object):
         '''
         return input_variable.get_shape().as_list()[-1]
             
-
     def _cnn_layer_calculate(self,input_value,input_layer_name,input_conv_matrix_bean,
                         input_pool_matrix_bean,input_active_kind = 1):
         '''
@@ -236,7 +247,6 @@ class MachineLearningService(object):
         accuracy = tf.reduce_mean(tf.cast(correct_p,tf.float32))
         return accuracy
 
-
     def _inputCheck(self,inputShapeDescribe):
         '''
         输入检查
@@ -250,19 +260,6 @@ class MachineLearningService(object):
         saver = tf.train.Saver()
         saver.restore(input_sess, input_path)
         return None
-
-    def _nn_prediction(self,inputShapeDescribe,inputX):
-        if not self._inputCheck(inputShapeDescribe):
-            raise Exception()
-    
-        (result,x) = self._nn_forward_caculate(inputShapeDescribe)
-
-        with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
-            resultValue = sess.run(result,feed_dict = {x:inputX})
-
-        return resultValue
-    
 
     def _train(self,inputShapeDescribe,inputX,inputY_,input_step = 5000,inputBatchSize = 8, use_save_path = None):
         if not self._inputCheck(inputShapeDescribe):

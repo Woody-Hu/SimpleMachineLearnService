@@ -10,10 +10,17 @@ from flask import request
 from LayerDescribeBean import *
 from MatrixDescribeBean import MatrixDescribeBean
 from ModelMakeRequestBean import ModelMakeRequestBean
+from LearningModelService import LearningModelService
+from MachineLearningService import MachineLearningService
 
 import json
 
 app = Flask(__name__)    
+
+dbService = LearningModelService()
+
+str_Sucess = "SUCESS"
+str_Error = "ERROR"
 
 @app.route('/')           
 def index():
@@ -21,14 +28,41 @@ def index():
 
 @app.route('/addmodel')   
 def add_model():
-    return 'Add modle';
+    name = request.values.get('name')
+    useJson = request.values.get('json')
+    
+    if "NoneContains" == check_model_name(name):
+        dbService.insert_model(name, useJson)
+        return str_Sucess
+    else:
+        return str_Error
 
 @app.route('/checkmodelname/<string:name>')
 def check_model_name(name): 
-    if name == '1':
-        return 'A'
+    if dbService.if_contains_model_name(name):
+        return "Contains"
     else:
-        return 'B'
+        return "NoneContains"   
+
+@app.route('/addmodelvalue')
+def add_value():
+    useJson = request.values.get('useJson')
+    useDic = json.loads(useJson)
+    
+    ifTrain = useDic['ifTrain']
+    useName = useDic['useName']
+    x_value =useDic['xValue']
+    y_value = useDic['yValue']
+    
+    if ifTrain:
+        returnValue = dbService.insert_train_value(useName, x_value, y_value)
+    else:
+        returnValue = dbService.insert_evaluate_value(useName, x_value, y_value)
+    
+    if not returnValue:
+        return str_Error
+    
+    return str_Sucess  
     
 def json_transform(strJ):
     #获取Json字典
